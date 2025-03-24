@@ -45,6 +45,7 @@ contract main {
 		string organ;
 		uint256 donorquantity;
 		uint256 recipientquantity;
+		uint256 matchedquantity;
 	}
 
 	event DonMatchFound(
@@ -101,17 +102,29 @@ contract main {
 					if (recipientList[i].bloodtype == posRecBT[j]) {
 						matchFound = true;
 						emit RecMatchFound(recipientList[i].owner, recipientList[i].bloodtype, recipientList[i].organ, recipientList[i].quantity);
-						matched_orgdet memory match_det = matched_orgdet({
-							donor: _owner,
-							recipient: recipientList[i].owner,
-							donorbloodtype: _bloodtype,
-							recipientbloodtype: recipientList[i].bloodtype,
-							organ: _organ,
-							donorquantity: _quantity,
-							recipientquantity: recipientList[i].quantity
-						});
-						matchedList.push(match_det);
-						break;
+						uint256 mq;
+						if (recipientList[i].quantity < _quantity) {
+							mq = (_quantity - recipientList[i].quantity);
+								matched_orgdet memory match_det = matched_orgdet({
+								donor: _owner,
+								recipient: recipientList[i].owner,
+								donorbloodtype: _bloodtype,
+								recipientbloodtype: recipientList[i].bloodtype,
+								organ: _organ,
+								donorquantity: _quantity,
+								recipientquantity: recipientList[i].quantity,
+								matchedquantity: recipientList[i].quantity
+							});
+							matchedList.push(match_det);
+							orgdet memory newDonor = orgdet({
+								owner: _owner,
+								bloodtype: _bloodtype,
+								organ: _organ,
+								quantity: mq
+							});
+							donorList.push(newDonor);
+							break;
+						}
 					}
 				}
 			}
@@ -148,6 +161,7 @@ contract main {
 					if (donorList[i].bloodtype == posDonBT[j]) {
 						matchFound = true;
 						emit DonMatchFound(donorList[i].owner, donorList[i].bloodtype, donorList[i].organ, donorList[i].quantity);
+						uint256 mq;
 						matched_orgdet memory match_det = matched_orgdet({
 							donor: donorList[i].owner,
 							recipient: _owner,
@@ -155,7 +169,8 @@ contract main {
 							recipientbloodtype: _bloodtype,
 							organ: _organ,
 							donorquantity: donorList[i].quantity,
-							recipientquantity: _quantity
+							recipientquantity: _quantity,
+							matchedquantity: mq
 						});
 						matchedList.push(match_det);
 						break;

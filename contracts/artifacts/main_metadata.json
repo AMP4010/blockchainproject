@@ -231,6 +231,11 @@
 								"internalType": "uint256",
 								"name": "recipientquantity",
 								"type": "uint256"
+							},
+							{
+								"internalType": "uint256",
+								"name": "matchedquantity",
+								"type": "uint256"
 							}
 						],
 						"internalType": "struct main.matched_orgdet[]",
@@ -311,11 +316,11 @@
 	},
 	"sources": {
 		"contracts/main.sol": {
-			"keccak256": "0x366acfa10c96e2748664c66cb877fae2b3130c7d129991315d9673b2b9d306f1",
+			"keccak256": "0x58ea31c8fc53ad937a70645fae5fb30926b430d84450d11056884854bd665084",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://802b54b8e89970dd6ffda407c6a53f06debe7342220cd234b0f6e8e87483f151",
-				"dweb:/ipfs/QmXMf8eWqJAS3eGxAMxJZriyqchBi2Xg1R1oYqZK2A6qmK"
+				"bzz-raw://e2811c1086b6f9f095eee1e4371aa5bf2f06c089536d009a168d5cb9067bde5b",
+				"dweb:/ipfs/Qmf8Aucuc3ta2jppBMz1EqNDMdpHfWibe3jGUJYUxszUoK"
 			]
 		}
 	},
