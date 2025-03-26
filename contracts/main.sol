@@ -82,6 +82,13 @@ contract main {
 	uint256[] private posRecBT;
 	uint256[] private posDonBT;
 
+	function pop(orgdet[] storage _list, uint256 _i) private {
+		orgdet memory temp = _list[_i];
+		_list[_i] = _list[_list.length - 1];
+		_list[_list.length - 1] = temp;
+		_list.pop();
+	}
+
 	function findMatchORaddDonor(string memory _owner, uint256 _bloodtype, string memory _organ, uint256 _quantity) public {
 
 		if (_bloodtype == 8 || _bloodtype == 9) {
@@ -102,10 +109,9 @@ contract main {
 					if (recipientList[i].bloodtype == posRecBT[j]) {
 						matchFound = true;
 						emit RecMatchFound(recipientList[i].owner, recipientList[i].bloodtype, recipientList[i].organ, recipientList[i].quantity);
-						uint256 mq;
-						if (recipientList[i].quantity < _quantity) {
-							mq = (_quantity - recipientList[i].quantity);
-								matched_orgdet memory match_det = matched_orgdet({
+						int256 pendingqty = int256(_quantity) - int256(recipientList[i].quantity);
+						if (pendingqty > 0) {
+							matched_orgdet memory match_det = matched_orgdet({
 								donor: _owner,
 								recipient: recipientList[i].owner,
 								donorbloodtype: _bloodtype,
@@ -120,9 +126,38 @@ contract main {
 								owner: _owner,
 								bloodtype: _bloodtype,
 								organ: _organ,
-								quantity: mq
+								quantity: uint256(pendingqty)
 							});
 							donorList.push(newDonor);
+							pop(recipientList, i);
+							break;
+						} else if (pendingqty == 0) {
+							matched_orgdet memory match_det = matched_orgdet({
+								donor: _owner,
+								recipient: recipientList[i].owner,
+								donorbloodtype: _bloodtype,
+								recipientbloodtype: recipientList[i].bloodtype,
+								organ: _organ,
+								donorquantity: _quantity,
+								recipientquantity: recipientList[i].quantity,
+								matchedquantity: recipientList[i].quantity
+							});
+							matchedList.push(match_det);
+							pop(recipientList, i);
+							break;
+						} else {
+							matched_orgdet memory match_det = matched_orgdet({
+								donor: _owner,
+								recipient: recipientList[i].owner,
+								donorbloodtype: _bloodtype,
+								recipientbloodtype: recipientList[i].bloodtype,
+								organ: _organ,
+								donorquantity: _quantity,
+								recipientquantity: recipientList[i].quantity,
+								matchedquantity: recipientList[i].quantity
+							});
+							matchedList.push(match_det);
+							recipientList[i].quantity = uint256(pendingqty * -1);
 							break;
 						}
 					}
@@ -161,7 +196,7 @@ contract main {
 					if (donorList[i].bloodtype == posDonBT[j]) {
 						matchFound = true;
 						emit DonMatchFound(donorList[i].owner, donorList[i].bloodtype, donorList[i].organ, donorList[i].quantity);
-						uint256 mq;
+						// uint256 remainingqty;
 						matched_orgdet memory match_det = matched_orgdet({
 							donor: donorList[i].owner,
 							recipient: _owner,
@@ -170,7 +205,7 @@ contract main {
 							organ: _organ,
 							donorquantity: donorList[i].quantity,
 							recipientquantity: _quantity,
-							matchedquantity: mq
+							matchedquantity: donorList[i].quantity
 						});
 						matchedList.push(match_det);
 						break;
