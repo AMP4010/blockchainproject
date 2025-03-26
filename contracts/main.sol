@@ -196,19 +196,57 @@ contract main {
 					if (donorList[i].bloodtype == posDonBT[j]) {
 						matchFound = true;
 						emit DonMatchFound(donorList[i].owner, donorList[i].bloodtype, donorList[i].organ, donorList[i].quantity);
-						// uint256 remainingqty;
-						matched_orgdet memory match_det = matched_orgdet({
-							donor: donorList[i].owner,
-							recipient: _owner,
-							donorbloodtype: donorList[i].bloodtype,
-							recipientbloodtype: _bloodtype,
-							organ: _organ,
-							donorquantity: donorList[i].quantity,
-							recipientquantity: _quantity,
-							matchedquantity: donorList[i].quantity
-						});
-						matchedList.push(match_det);
-						break;
+						int256 remainingqty = int256(_quantity) - int256(donorList[i].quantity);
+						if (remainingqty > 0 ) {
+							matched_orgdet memory match_det = matched_orgdet({
+								donor: donorList[i].owner,
+								recipient: _owner,
+								donorbloodtype: donorList[i].bloodtype,
+								recipientbloodtype: _bloodtype,
+								organ: _organ,
+								donorquantity: donorList[i].quantity,
+								recipientquantity: _quantity,
+								matchedquantity: donorList[i].quantity
+							});
+							matchedList.push(match_det);
+							orgdet memory newRecipient = orgdet({
+								owner: _owner,
+								bloodtype: _bloodtype,
+								organ: _organ,
+								quantity: uint256(remainingqty)
+							});
+							recipientList.push(newRecipient);
+							pop(donorList, i);
+							break;
+						} else if (remainingqty == 0) {
+							matched_orgdet memory match_det = matched_orgdet({
+								donor: donorList[i].owner,
+								recipient: _owner,
+								donorbloodtype: donorList[i].bloodtype,
+								recipientbloodtype: _bloodtype,
+								organ: _organ,
+								donorquantity: donorList[i].quantity,
+								recipientquantity: _quantity,
+								matchedquantity: donorList[i].quantity
+							});
+							matchedList.push(match_det);
+							pop(donorList, i);
+							break;
+						} else {
+							matched_orgdet memory match_det = matched_orgdet({
+								donor: donorList[i].owner,
+								recipient: _owner,
+								donorbloodtype: donorList[i].bloodtype,
+								recipientbloodtype: _bloodtype,
+								organ: _organ,
+								donorquantity: donorList[i].quantity,
+								recipientquantity: _quantity,
+								matchedquantity: donorList[i].quantity
+							});
+							matchedList.push(match_det);
+							donorList[i].quantity = uint256(remainingqty * -1);
+							break;
+						}
 					}
 				}
 			}
