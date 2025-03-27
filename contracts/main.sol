@@ -116,7 +116,7 @@ contract main {
 		}
 	}
 
-	function findMatchORaddDonor(string memory _owner, uint256 _bloodtype, string memory _organ, uint256 _quantity) public {
+	function regDonor(string memory _owner, uint256 _bloodtype, string memory _organ, uint256 _quantity) public {
 
 		if (_bloodtype == 8 || _bloodtype == 9) {
 			posBT = [_bloodtype];
@@ -161,7 +161,7 @@ contract main {
 		}
 	}
 
-	function findMatchORaddRecipient(string memory _owner, string memory _organ, uint256 _bloodtype, uint256 _quantity) public {
+	function regRecipient(string memory _owner, string memory _organ, uint256 _bloodtype, uint256 _quantity) public {
 
 		if (_bloodtype == 8 || _bloodtype == 9) {
 			posBT = [_bloodtype];
