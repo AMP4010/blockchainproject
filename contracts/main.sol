@@ -35,6 +35,7 @@ contract main {
 		uint256 bloodtype;
 		string organ;
 		uint256 quantity;
+		string hospital;
 	}
 
 	struct matched_orgdet {
@@ -46,20 +47,24 @@ contract main {
 		uint256 donorquantity;
 		uint256 recipientquantity;
 		uint256 matchedquantity;
+		string donorhosp;
+		string recipienthosp;
 	}
 
 	event DonMatchFound(
 		string donorOwner,
 		uint256 donorBloodType,
 		string donorOrgan,
-		uint256 donorQuantity
+		uint256 donorQuantity,
+		string donorHospital
 	);
 
 	event RecMatchFound(
 		string recipientOwner,
 		uint256 recipientBloodType,
 		string recipientOrgan,
-		uint256 recipientQuantity
+		uint256 recipientQuantity,
+		string recipientHospital
 	);
 
 	orgdet[] private donorList;
@@ -88,7 +93,7 @@ contract main {
 		_list.pop();
 	}
 
-	function pushMatch(string memory _donor, string memory _recipient, uint256 _dbt, uint256 _rbt, string memory _organ, uint256 _dqty, uint256 _rqty, uint256 _mqty) private {
+	function pushMatch(string memory _donor, string memory _recipient, uint256 _dbt, uint256 _rbt, string memory _organ, uint256 _dqty, uint256 _rqty, uint256 _mqty, string memory _dhosp, string memory _rhosp) private {
 		matched_orgdet memory match_det = matched_orgdet({
 			donor: _donor,
 			recipient: _recipient,
@@ -97,17 +102,20 @@ contract main {
 			organ: _organ,
 			donorquantity: _dqty,
 			recipientquantity: _rqty,
-			matchedquantity: _mqty
+			matchedquantity: _mqty,
+			donorhosp: _dhosp,
+			recipienthosp: _rhosp
 		});
 		matchedList.push(match_det);
 	}
 
-	function pushNew(string memory _owner, uint256 _bloodtype, string memory _organ, uint256 _quantity, uint256 _type) private {
+	function pushNew(string memory _owner, uint256 _bloodtype, string memory _organ, uint256 _quantity, string memory _hospital, uint256 _type) private {
 		orgdet memory newEntry = orgdet({
 			owner: _owner,
 			bloodtype: _bloodtype,
 			organ: _organ,
-			quantity: uint256(_quantity)
+			quantity: uint256(_quantity),
+			hospital: _hospital
 		});
 		if (_type == 0) {
 			donorList.push(newEntry);
@@ -116,7 +124,7 @@ contract main {
 		}
 	}
 
-	function regDonor(string memory _owner, uint256 _bloodtype, string memory _organ, uint256 _quantity) public {
+	function regDonor(string memory _owner, uint256 _bloodtype, string memory _organ, uint256 _quantity, string memory _hospital) public {
 
 		if (_bloodtype == 8 || _bloodtype == 9) {
 			posBT = [_bloodtype];
@@ -135,19 +143,19 @@ contract main {
 				for (uint256 j = 0; j <	posBT.length; j++) {
 					if (recipientList[i].bloodtype == posBT[j]) {
 						matchFound = true;
-						emit RecMatchFound(recipientList[i].owner, recipientList[i].bloodtype, recipientList[i].organ, recipientList[i].quantity);
+						emit RecMatchFound(recipientList[i].owner, recipientList[i].bloodtype, recipientList[i].organ, recipientList[i].quantity, recipientList[i].hospital);
 						int256 pendingqty = int256(_quantity) - int256(recipientList[i].quantity);
 						if (pendingqty > 0) {
-							pushMatch(_owner, recipientList[i].owner, _bloodtype, recipientList[i].bloodtype, _organ, _quantity, recipientList[i].quantity, recipientList[i].quantity);
-							pushNew(_owner, _bloodtype, _organ, uint256(pendingqty), 0);
+							pushMatch(_owner, recipientList[i].owner, _bloodtype, recipientList[i].bloodtype, _organ, _quantity, recipientList[i].quantity, recipientList[i].quantity, _hospital, recipientList[i].hospital);
+							pushNew(_owner, _bloodtype, _organ, uint256(pendingqty), _hospital, 0);
 							pop(recipientList, i);
 							break;
 						} else if (pendingqty == 0) {
-							pushMatch(_owner, recipientList[i].owner, _bloodtype, recipientList[i].bloodtype, _organ, _quantity, recipientList[i].quantity, recipientList[i].quantity);
+							pushMatch(_owner, recipientList[i].owner, _bloodtype, recipientList[i].bloodtype, _organ, _quantity, recipientList[i].quantity, recipientList[i].quantity, _hospital, recipientList[i].hospital);
 							pop(recipientList, i);
 							break;
 						} else {
-							pushMatch(_owner, recipientList[i].owner, _bloodtype, recipientList[i].bloodtype, _organ, _quantity, recipientList[i].quantity, recipientList[i].quantity);
+							pushMatch(_owner, recipientList[i].owner, _bloodtype, recipientList[i].bloodtype, _organ, _quantity, recipientList[i].quantity, recipientList[i].quantity, _hospital, recipientList[i].hospital);
 							recipientList[i].quantity = uint256(pendingqty * -1);
 							break;
 						}
@@ -157,11 +165,11 @@ contract main {
 		}
 
 		if (!matchFound) {
-			pushNew(_owner, _bloodtype, _organ, _quantity, 0);
+			pushNew(_owner, _bloodtype, _organ, _quantity, _hospital, 0);
 		}
 	}
 
-	function regRecipient(string memory _owner, string memory _organ, uint256 _bloodtype, uint256 _quantity) public {
+	function regRecipient(string memory _owner, string memory _organ, uint256 _bloodtype, uint256 _quantity, string memory _hospital) public {
 
 		if (_bloodtype == 8 || _bloodtype == 9) {
 			posBT = [_bloodtype];
@@ -180,19 +188,19 @@ contract main {
 				for (uint256 j = 0; j <	posBT.length; j++) {
 					if (donorList[i].bloodtype == posBT[j]) {
 						matchFound = true;
-						emit DonMatchFound(donorList[i].owner, donorList[i].bloodtype, donorList[i].organ, donorList[i].quantity);
+						emit DonMatchFound(donorList[i].owner, donorList[i].bloodtype, donorList[i].organ, donorList[i].quantity, donorList[i].hospital);
 						int256 remainingqty = int256(_quantity) - int256(donorList[i].quantity);
 						if (remainingqty > 0 ) {
-							pushMatch(donorList[i].owner, _owner, donorList[i].bloodtype, _bloodtype, _organ, donorList[i].quantity, _quantity, donorList[i].quantity);
-							pushNew(_owner, _bloodtype, _organ, uint256(remainingqty), 1);
+							pushMatch(donorList[i].owner, _owner, donorList[i].bloodtype, _bloodtype, _organ, donorList[i].quantity, _quantity, donorList[i].quantity, donorList[i].hospital, _hospital);
+							pushNew(_owner, _bloodtype, _organ, uint256(remainingqty), _hospital, 1);
 							pop(donorList, i);
 							break;
 						} else if (remainingqty == 0) {
-							pushMatch(donorList[i].owner, _owner, donorList[i].bloodtype, _bloodtype, _organ, donorList[i].quantity, _quantity, donorList[i].quantity);
+							pushMatch(donorList[i].owner, _owner, donorList[i].bloodtype, _bloodtype, _organ, donorList[i].quantity, _quantity, donorList[i].quantity, donorList[i].hospital, _hospital);
 							pop(donorList, i);
 							break;
 						} else {
-							pushMatch(donorList[i].owner, _owner, donorList[i].bloodtype, _bloodtype, _organ, donorList[i].quantity, _quantity, donorList[i].quantity);
+							pushMatch(donorList[i].owner, _owner, donorList[i].bloodtype, _bloodtype, _organ, donorList[i].quantity, _quantity, donorList[i].quantity, donorList[i].hospital, _hospital);
 							donorList[i].quantity = uint256(remainingqty * -1);
 							break;
 						}
@@ -202,7 +210,7 @@ contract main {
 		}
 
 		if (!matchFound) {
-			pushNew(_owner, _bloodtype, _organ, _quantity, 1);
+			pushNew(_owner, _bloodtype, _organ, _quantity, _hospital, 1);
 		}
 	}
 
