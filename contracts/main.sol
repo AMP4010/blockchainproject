@@ -29,12 +29,42 @@ contract main {
 		require(keccak256(abi.encodePacked(keccak256(abi.encodePacked(_pass)))) == matchedPass, "Incorrect password!");
 		_;
 	}
+	
+	struct HLA_A {
+		string allele1;
+		string allele2;
+	}
+
+	struct HLA_B {
+		string allele1;
+		string allele2;
+	}
+
+	struct HLA_C {
+		string allele1;
+		string allele2;
+	}
+
+	struct HLA_DRB1 {
+		string allele1;
+		string allele2;
+	}
+
+	struct HLA_DQB1 {
+		string allele1;
+		string allele2;
+	}
 
 	struct orgdet {
 		string owner;
 		uint256 bloodtype;
 		string organ;
 		uint256 quantity;
+		HLA_A hla_a;
+		HLA_B hla_b;
+		HLA_C hla_c;
+		HLA_DRB1 hla_drb1;
+		HLA_DQB1 hla_dqb1;
 		string hospital;
 	}
 
@@ -56,6 +86,11 @@ contract main {
 		uint256 donorBloodType,
 		string donorOrgan,
 		uint256 donorQuantity,
+		HLA_A hla_a,
+		HLA_B hla_b,
+		HLA_C hla_c,
+		HLA_DRB1 hla_drb1,
+		HLA_DQB1 hla_dqb1,
 		string donorHospital
 	);
 
@@ -64,6 +99,11 @@ contract main {
 		uint256 recipientBloodType,
 		string recipientOrgan,
 		uint256 recipientQuantity,
+		HLA_A hla_a,
+		HLA_B hla_b,
+		HLA_C hla_c,
+		HLA_DRB1 hla_drb1,
+		HLA_DQB1 hla_dqb1,
 		string recipientHospital
 	);
 
@@ -109,12 +149,17 @@ contract main {
 		matchedList.push(match_det);
 	}
 
-	function pushNew(string memory _owner, uint256 _bloodtype, string memory _organ, uint256 _quantity, string memory _hospital, uint256 _type) private {
+	function pushNew(string memory _owner, uint256 _bloodtype, string memory _organ, uint256 _quantity, HLA_A memory _hla_a, HLA_B memory _hla_b, HLA_C memory _hla_c, HLA_DRB1 memory _hla_drb1, HLA_DQB1 memory _hla_dqb1, string memory _hospital, uint256 _type) private {
 		orgdet memory newEntry = orgdet({
 			owner: _owner,
 			bloodtype: _bloodtype,
 			organ: _organ,
 			quantity: uint256(_quantity),
+			hla_a: _hla_a,
+			hla_b: _hla_b,
+			hla_c: _hla_c,
+			hla_drb1: _hla_drb1,
+			hla_dqb1: _hla_dqb1,
 			hospital: _hospital
 		});
 		if (_type == 0) {
@@ -124,7 +169,7 @@ contract main {
 		}
 	}
 
-	function regDonor(string memory _owner, uint256 _bloodtype, string memory _organ, uint256 _quantity, string memory _hospital) public {
+	function regDonor(string memory _owner, uint256 _bloodtype, string memory _organ, uint256 _quantity, HLA_A memory _hla_a, HLA_B memory _hla_b, HLA_C memory _hla_c, HLA_DRB1 memory _hla_drb1, HLA_DQB1 memory _hla_dqb1, string memory _hospital) public {
 
 		if (_bloodtype == 8 || _bloodtype == 9) {
 			posBT = [_bloodtype];
@@ -143,11 +188,11 @@ contract main {
 				for (uint256 j = 0; j <	posBT.length; j++) {
 					if (recipientList[i].bloodtype == posBT[j]) {
 						matchFound = true;
-						emit RecMatchFound(recipientList[i].owner, recipientList[i].bloodtype, recipientList[i].organ, recipientList[i].quantity, recipientList[i].hospital);
+						emit RecMatchFound(recipientList[i].owner, recipientList[i].bloodtype, recipientList[i].organ, recipientList[i].quantity, recipientList[i].hla_a, recipientList[i].hla_b, recipientList[i].hla_c, recipientList[i].hla_drb1, recipientList[i].hla_dqb1, recipientList[i].hospital);
 						int256 pendingqty = int256(_quantity) - int256(recipientList[i].quantity);
 						if (pendingqty > 0) {
 							pushMatch(_owner, recipientList[i].owner, _bloodtype, recipientList[i].bloodtype, _organ, _quantity, recipientList[i].quantity, recipientList[i].quantity, _hospital, recipientList[i].hospital);
-							pushNew(_owner, _bloodtype, _organ, uint256(pendingqty), _hospital, 0);
+							pushNew(_owner, _bloodtype, _organ, uint256(pendingqty), _hla_a, _hla_b, _hla_c, _hla_drb1, _hla_dqb1, _hospital, 0);
 							pop(recipientList, i);
 							break;
 						} else if (pendingqty == 0) {
@@ -165,7 +210,7 @@ contract main {
 		}
 
 		if (!matchFound) {
-			pushNew(_owner, _bloodtype, _organ, _quantity, _hospital, 0);
+			pushNew(_owner, _bloodtype, _organ, _quantity, _hla_a, _hla_b, _hla_c, _hla_drb1, _hla_dqb1, _hospital, 0);
 		}
 	}
 
