@@ -133,6 +133,15 @@ contract main {
 		}
 	}
 
+	function getMinHLA(uint256 min, string memory a, string memory b, string memory c, string memory d, string memory e, string memory f, string memory g, string memory h, string memory i, string memory j, string memory k, string memory l, string memory m, string memory n, string memory o, string memory p, string memory q, string memory r, string memory s, string memory t) private returns (uint256) {
+		min += compAll(a, b) + compAll(c, d);
+		min += compAll(e, f) + compAll(g, h);
+		min += compAll(i, j) + compAll(k, l);
+		min += compAll(m, n) + compAll(o, p);
+		min += compAll(q, r) + compAll(s, t);
+		return min;
+	}
+
 	function pop(orgdet[] storage _list, uint256 _i) private {
 		orgdet memory temp = _list[_i];
 		_list[_i] = _list[_list.length - 1];
@@ -210,11 +219,7 @@ contract main {
 				for (uint256 j = 0; j <	posBT.length; j++) {
 					if (recipientList[i].bloodtype == posBT[j]) {
 						uint256 m = 0;
-						m += compAll(_hla_a.allele1, recipientList[i].hla_a.allele1) + compAll(_hla_a.allele2, recipientList[i].hla_a.allele2);
-						m += compAll(_hla_b.allele1, recipientList[i].hla_b.allele1) + compAll(_hla_b.allele2, recipientList[i].hla_b.allele2);
-						m += compAll(_hla_c.allele1, recipientList[i].hla_c.allele1) + compAll(_hla_c.allele2, recipientList[i].hla_c.allele2);
-						m += compAll(_hla_drb1.allele1, recipientList[i].hla_drb1.allele1) + compAll(_hla_drb1.allele2, recipientList[i].hla_drb1.allele2);
-						m += compAll(_hla_dqb1.allele1, recipientList[i].hla_dqb1.allele1) + compAll(_hla_dqb1.allele2, recipientList[i].hla_dqb1.allele2);
+						m = getMinHLA(m, _hla_a.allele1, recipientList[i].hla_a.allele1, _hla_a.allele2, recipientList[i].hla_a.allele2, _hla_b.allele1, recipientList[i].hla_b.allele1, _hla_b.allele2, recipientList[i].hla_b.allele2, _hla_c.allele1, recipientList[i].hla_c.allele1, _hla_c.allele2, recipientList[i].hla_c.allele2, _hla_drb1.allele1, recipientList[i].hla_drb1.allele1, _hla_drb1.allele2, recipientList[i].hla_drb1.allele2, _hla_dqb1.allele1, recipientList[i].hla_dqb1.allele1, _hla_dqb1.allele2, recipientList[i].hla_dqb1.allele2);
 						if (m >= minHla) {
 							matchFound = true;
 							uint256 matchPC = (minHla/10) * 100;
