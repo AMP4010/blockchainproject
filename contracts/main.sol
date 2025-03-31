@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
+import "./functions.sol";
+
 contract main {
 	bytes32 private donorPass;
 	bytes32 private recipientPass;
@@ -66,6 +68,16 @@ contract main {
 		uint256 donorquantity;
 		uint256 recipientquantity;
 		uint256 matchedquantity;
+		HLA don_hla_a;
+		HLA don_hla_b;
+		HLA don_hla_c;
+		HLA don_hla_drb1;
+		HLA don_hla_dqb1;
+		HLA rec_hla_a;
+		HLA rec_hla_b;
+		HLA rec_hla_c;
+		HLA rec_hla_drb1;
+		HLA rec_hla_dqb1;
 		string donorhosp;
 		string recipienthosp;
 	}
@@ -108,88 +120,11 @@ contract main {
 											[0, 0, 0, 0, 0, 0, 0, 0, 0, 1]];
 
 	uint256[] private posBT;
-
-	function lowerString(string memory _text) private returns (string memory) {
-		bytes memory btext = bytes(_text);
-		for (uint256 i = 0; i < btext.length; i++) {
-			if (btext[i] >= 0x41 && btext[i] <= 0x5A) {
-                btext[i] = bytes1(uint8(btext[i]) + 32);
-            }
-		}
-		return string(btext);
-	}
-
-	function compAll(string memory o1_all, string memory o2_all) private returns (uint256) {
-		uint256 a1 = (uint8(bytes(o1_all)[0]) - 48) * 10 + (uint8(bytes(o1_all)[1]) - 48);
-        uint256 a2 = (uint8(bytes(o2_all)[0]) - 48) * 10 + (uint8(bytes(o2_all)[1]) - 48);
-        uint256 b1 = (uint8(bytes(o1_all)[3]) - 48) * 10 + (uint8(bytes(o1_all)[4]) - 48);
-        uint256 b2 = (uint8(bytes(o2_all)[3]) - 48) * 10 + (uint8(bytes(o2_all)[4]) - 48);
-		uint256 c1 = (uint8(bytes(o1_all)[6]) - 48) * 10 + (uint8(bytes(o1_all)[7]) - 48);
-        uint256 c2 = (uint8(bytes(o2_all)[6]) - 48) * 10 + (uint8(bytes(o2_all)[7]) - 48);
-		if (a1 == a2 && b1 == b2 && c1 == c2) {
-			return 1;
-		} else {
-			return 0;
-		}
-	}
-
-	function getMinHLA(uint256 min, string memory a, string memory b, string memory c, string memory d, string memory e, string memory f, string memory g, string memory h, string memory i, string memory j, string memory k, string memory l, string memory m, string memory n, string memory o, string memory p, string memory q, string memory r, string memory s, string memory t) private returns (uint256) {
-		min += compAll(a, b) + compAll(c, d);
-		min += compAll(e, f) + compAll(g, h);
-		min += compAll(i, j) + compAll(k, l);
-		min += compAll(m, n) + compAll(o, p);
-		min += compAll(q, r) + compAll(s, t);
-		return min;
-	}
-
-	function pop(orgdet[] storage _list, uint256 _i) private {
-		orgdet memory temp = _list[_i];
-		_list[_i] = _list[_list.length - 1];
-		_list[_list.length - 1] = temp;
-		_list.pop();
-	}
-
-	function pushMatch(string memory _donor, uint256 _dage, string memory _recipient, uint256 _rage, uint256 _dbt, uint256 _rbt, string memory _organ, uint256 _dqty, uint256 _rqty, uint256 _mqty, string memory _dhosp, string memory _rhosp) private {
-		matched_orgdet memory match_det = matched_orgdet({
-			donor: _donor,
-			donorage: _dage,
-			recipient: _recipient,
-			recipientage: _rage,
-			donorbloodtype: _dbt,
-			recipientbloodtype: _rbt,
-			organ: _organ,
-			donorquantity: _dqty,
-			recipientquantity: _rqty,
-			matchedquantity: _mqty,
-			donorhosp: _dhosp,
-			recipienthosp: _rhosp
-		});
-		matchedList.push(match_det);
-	}
-
-	function pushNew(string memory _owner, uint256 _age, uint256 _bloodtype, string memory _organ, uint256 _quantity, HLA memory _hla_a, HLA memory _hla_b, HLA memory _hla_c, HLA memory _hla_drb1, HLA memory _hla_dqb1, string memory _hospital, uint256 _type) private {
-		orgdet memory newEntry = orgdet({
-			owner: _owner,
-			age: _age,
-			bloodtype: _bloodtype,
-			organ: _organ,
-			quantity: uint256(_quantity),
-			hla_a: _hla_a,
-			hla_b: _hla_b,
-			hla_c: _hla_c,
-			hla_drb1: _hla_drb1,
-			hla_dqb1: _hla_dqb1,
-			hospital: _hospital
-		});
-		if (_type == 0) {
-			donorList.push(newEntry);
-		} else {
-			recipientList.push(newEntry);
-		}
-	}
+	uint8[5] private minScores = [9, 7, 5, 2, 0];
 
 	function regDonor(string memory _owner, uint256 _age, uint256 _bloodtype, string memory _organ, uint256 _quantity, HLA memory _hla_a, HLA memory _hla_b, HLA memory _hla_c, HLA memory _hla_drb1, HLA memory _hla_dqb1, string memory _hospital) public {
-
+		
+		// posBT = functions.getPosBT(compatMatrix, _bloodtype);
 		if (_bloodtype == 8 || _bloodtype == 9) {
 			posBT = [_bloodtype];
 		} else {
@@ -200,42 +135,36 @@ contract main {
 			}
 		}
 
-		_organ = lowerString(_organ);
-		uint256 minHla;
-		uint8[5] memory scores = [9, 7, 5, 2, 0];
-        for (uint256 i = 0; i < scores.length; i++) {
-            string[] memory organs = minHLA[scores[i]];
-            for (uint256 j = 0; j < organs.length; j++) {
-                if (keccak256(bytes(organs[j])) == keccak256(bytes(_organ))) {
-                    minHla = scores[i];
-                }
-            }
-		}
-
+		_organ = functions.lowerString(_organ);
+		uint256 minReqdHla = functions.getHlaCat(_organ, minHLA);
 		bool matchFound = false;
 
 		for (uint256 i = 0; i < recipientList.length; i++) {
 			if (keccak256(bytes(recipientList[i].organ)) == keccak256(bytes(_organ))) {
 				for (uint256 j = 0; j <	posBT.length; j++) {
 					if (recipientList[i].bloodtype == posBT[j]) {
-						uint256 m = 0;
-						m = getMinHLA(m, _hla_a.allele1, recipientList[i].hla_a.allele1, _hla_a.allele2, recipientList[i].hla_a.allele2, _hla_b.allele1, recipientList[i].hla_b.allele1, _hla_b.allele2, recipientList[i].hla_b.allele2, _hla_c.allele1, recipientList[i].hla_c.allele1, _hla_c.allele2, recipientList[i].hla_c.allele2, _hla_drb1.allele1, recipientList[i].hla_drb1.allele1, _hla_drb1.allele2, recipientList[i].hla_drb1.allele2, _hla_dqb1.allele1, recipientList[i].hla_dqb1.allele1, _hla_dqb1.allele2, recipientList[i].hla_dqb1.allele2);
-						if (m >= minHla) {
+						uint256 matchScore = 0;
+						matchScore = functions.getHLA(_hla_a.allele1, recipientList[i].hla_a.allele1, _hla_a.allele2, recipientList[i].hla_a.allele2, 
+											 		  _hla_b.allele1, recipientList[i].hla_b.allele1, _hla_b.allele2, recipientList[i].hla_b.allele2, 
+											 		  _hla_c.allele1, recipientList[i].hla_c.allele1, _hla_c.allele2, recipientList[i].hla_c.allele2, 
+											          _hla_drb1.allele1, recipientList[i].hla_drb1.allele1, _hla_drb1.allele2, recipientList[i].hla_drb1.allele2, 
+													  _hla_dqb1.allele1, recipientList[i].hla_dqb1.allele1, _hla_dqb1.allele2, recipientList[i].hla_dqb1.allele2, matchScore);
+						if (matchScore >= minReqdHla) {
 							matchFound = true;
-							uint256 matchPC = (minHla/10) * 100;
+							uint256 matchPC = (minReqdHla/10) * 100;
 							emit RecMatchFound(recipientList[i].owner, recipientList[i].age, recipientList[i].bloodtype, recipientList[i].organ, recipientList[i].quantity, matchPC, recipientList[i].hospital);
 							int256 pendingqty = int256(_quantity) - int256(recipientList[i].quantity);
 							if (pendingqty > 0) {
-								pushMatch(_owner, _age, recipientList[i].owner, recipientList[i].age, _bloodtype, recipientList[i].bloodtype, _organ, _quantity, recipientList[i].quantity, recipientList[i].quantity, _hospital, recipientList[i].hospital);
-								pushNew(_owner, _age, _bloodtype, _organ, uint256(pendingqty), _hla_a, _hla_b, _hla_c, _hla_drb1, _hla_dqb1, _hospital, 0);
-								pop(recipientList, i);
+								functions.pushMatch(matchedList, _owner, _age, recipientList[i].owner, recipientList[i].age, _bloodtype, recipientList[i].bloodtype, _organ, _quantity, recipientList[i].quantity, recipientList[i].quantity, _hla_a, _hla_b, _hla_c, _hla_drb1, _hla_dqb1, recipientList[i].hla_a, recipientList[i].hla_b, recipientList[i].hla_c, recipientList[i].hla_drb1, recipientList[i].hla_dqb1, _hospital, recipientList[i].hospital);
+								functions.pushNew(donorList, _owner, _age, _bloodtype, _organ, uint256(pendingqty), _hla_a, _hla_b, _hla_c, _hla_drb1, _hla_dqb1, _hospital);
+								functions.pop(recipientList, i);
 								break;
 							} else if (pendingqty == 0) {
-								pushMatch(_owner, _age, recipientList[i].owner, recipientList[i].age, _bloodtype, recipientList[i].bloodtype, _organ, _quantity, recipientList[i].quantity, recipientList[i].quantity, _hospital, recipientList[i].hospital);
-								pop(recipientList, i);
+								functions.pushMatch(_owner, _age, recipientList[i].owner, recipientList[i].age, _bloodtype, recipientList[i].bloodtype, _organ, _quantity, recipientList[i].quantity, recipientList[i].quantity, _hla_a, _hla_b, _hla_c, _hla_drb1, _hla_dqb1, _hospital, recipientList[i].hospital);
+								functions.pop(recipientList, i);
 								break;
 							} else {
-								pushMatch(_owner, _age, recipientList[i].owner, recipientList[i].age, _bloodtype, recipientList[i].bloodtype, _organ, _quantity, recipientList[i].quantity, recipientList[i].quantity, _hospital, recipientList[i].hospital);
+								functions.pushMatch(_owner, _age, recipientList[i].owner, recipientList[i].age, _bloodtype, recipientList[i].bloodtype, _organ, _quantity, recipientList[i].quantity, recipientList[i].quantity, _hla_a, _hla_b, _hla_c, _hla_drb1, _hla_dqb1, _hospital, recipientList[i].hospital);
 								recipientList[i].quantity = uint256(pendingqty * -1);
 								break;
 							}
@@ -246,7 +175,7 @@ contract main {
 		}
 
 		if (!matchFound) {
-			pushNew(_owner, _age, _bloodtype, _organ, _quantity, _hla_a, _hla_b, _hla_c, _hla_drb1, _hla_dqb1, _hospital, 0);
+			functions.pushNew(_owner, _age, _bloodtype, _organ, _quantity, _hla_a, _hla_b, _hla_c, _hla_drb1, _hla_dqb1, _hospital, 0);
 		}
 	}
 
@@ -262,7 +191,7 @@ contract main {
 			}
 		}
 
-		_organ = lowerString(_organ);
+		_organ = functions.lowerString(_organ);
 		uint256 minHla;
 		uint8[5] memory scores = [9, 7, 5, 2, 0];
         for (uint256 i = 0; i < scores.length; i++) {
@@ -285,16 +214,16 @@ contract main {
 						emit DonMatchFound(donorList[i].owner, donorList[i].age, donorList[i].bloodtype, donorList[i].organ, donorList[i].quantity, matchPC, donorList[i].hospital);
 						int256 remainingqty = int256(_quantity) - int256(donorList[i].quantity);
 						if (remainingqty > 0 ) {
-							pushMatch(donorList[i].owner, donorList[i].age, _owner, _age, donorList[i].bloodtype, _bloodtype, _organ, donorList[i].quantity, _quantity, donorList[i].quantity, donorList[i].hospital, _hospital);
-							pushNew(_owner, _age, _bloodtype, _organ, uint256(remainingqty), _hla_a, _hla_b, _hla_c, _hla_drb1, _hla_dqb1, _hospital, 1);
-							pop(donorList, i);
+							functions.pushMatch(donorList[i].owner, donorList[i].age, _owner, _age, donorList[i].bloodtype, _bloodtype, _organ, donorList[i].quantity, _quantity, donorList[i].quantity, donorList[i].hospital, _hospital);
+							functions.pushNew(_owner, _age, _bloodtype, _organ, uint256(remainingqty), _hla_a, _hla_b, _hla_c, _hla_drb1, _hla_dqb1, _hospital, 1);
+							functions.pop(donorList, i);
 							break;
 						} else if (remainingqty == 0) {
-							pushMatch(donorList[i].owner, donorList[i].age, _owner, _age, donorList[i].bloodtype, _bloodtype, _organ, donorList[i].quantity, _quantity, donorList[i].quantity, donorList[i].hospital, _hospital);
-							pop(donorList, i);
+							functions.pushMatch(donorList[i].owner, donorList[i].age, _owner, _age, donorList[i].bloodtype, _bloodtype, _organ, donorList[i].quantity, _quantity, donorList[i].quantity, donorList[i].hospital, _hospital);
+							functions.pop(donorList, i);
 							break;
 						} else {
-							pushMatch(donorList[i].owner, donorList[i].age, _owner, _age, donorList[i].bloodtype, _bloodtype, _organ, donorList[i].quantity, _quantity, donorList[i].quantity, donorList[i].hospital, _hospital);
+							functions.pushMatch(donorList[i].owner, donorList[i].age, _owner, _age, donorList[i].bloodtype, _bloodtype, _organ, donorList[i].quantity, _quantity, donorList[i].quantity, donorList[i].hospital, _hospital);
 							donorList[i].quantity = uint256(remainingqty * -1);
 							break;
 						}
@@ -304,7 +233,7 @@ contract main {
 		}
 
 		if (!matchFound) {
-			pushNew(_owner, _age, _bloodtype, _organ, _quantity, _hla_a, _hla_b, _hla_c, _hla_drb1, _hla_dqb1, _hospital, 1);
+			functions.pushNew(_owner, _age, _bloodtype, _organ, _quantity, _hla_a, _hla_b, _hla_c, _hla_drb1, _hla_dqb1, _hospital, 1);
 		}
 	}
 
