@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
-library functions {
+library utils {
     struct HLA {
 		string allele1;
 		string allele2;
@@ -46,18 +46,25 @@ library functions {
 		string recipienthosp;
 	}
 
-    /* function getPosBT(uint[10][10] storage compatMatrix, uint256 _bloodtype) internal pure returns (uint256) {
-        uint256[] memarray;
-        if (_bloodtype == 8 || _bloodtype == 9) {
-			array.push(_bloodtype);
+	function getPosBT(uint256 _bloodtype, uint256[10][10] storage _compatMatrix, uint256[] storage _posBT, uint256 _mode) internal {
+		if (_bloodtype == 8 || _bloodtype == 9) {
+			_posBT.push(_bloodtype);
+			return;
+		}
+		if (_mode == 0) {
+			for (uint256 i = 0; i < 8; i++) {
+				if (_compatMatrix[i][_bloodtype] == 1) {
+					_posBT.push(i);
+				}
+			}
 		} else {
 			for (uint256 i = 0; i < 8; i++) {
-				if (compatMatrix[i][_bloodtype] == 1) {
-					array.push(i);
+				if (_compatMatrix[_bloodtype][i] == 1) {
+					_posBT.push(i);
 				}
 			}
 		}
-    } */
+	}
 
     function lowerString(string memory _text) internal pure returns (string memory) {
 		bytes memory btext = bytes(_text);
@@ -98,11 +105,11 @@ library functions {
     }
 
 	function getHLA(string memory a, string memory b, string memory c, string memory d,
-                       string memory e, string memory f, string memory g, string memory h, 
-                       string memory i, string memory j, string memory k, string memory l, 
-                       string memory m, string memory n, string memory o, string memory p, 
-                       string memory q, string memory r, string memory s, string memory t, 
-                       uint256 min) internal pure returns (uint256) {
+                    string memory e, string memory f, string memory g, string memory h, 
+                    string memory i, string memory j, string memory k, string memory l, 
+                    string memory m, string memory n, string memory o, string memory p, 
+                    string memory q, string memory r, string memory s, string memory t, 
+                    uint256 min) internal pure returns (uint256) {
 		min += compAll(a, b) + compAll(c, d);
 		min += compAll(e, f) + compAll(g, h);
 		min += compAll(i, j) + compAll(k, l);
@@ -118,7 +125,7 @@ library functions {
 		_list.pop();
 	}
 
-	function pushMatch(matched_orgdet[] memory _matchedList, string memory _donor, uint256 _dage, string memory _recipient, uint256 _rage, uint256 _dbt, uint256 _rbt, string memory _organ, uint256 _dqty, uint256 _rqty, uint256 _mqty, HLA memory _d_hla_a, HLA memory _d_hla_b, HLA memory _d_hla_c, HLA memory _d_hla_drb1, HLA memory _d_hla_dqb1, HLA memory _r_hla_a, HLA memory _r_hla_b, HLA memory _r_hla_c, HLA memory _r_hla_drb1, HLA memory _r_hla_dqb1, string memory _dhosp, string memory _rhosp) internal {
+	function pushMatch(matched_orgdet[] storage _matchedList, string memory _donor, uint256 _dage, string memory _recipient, uint256 _rage, uint256 _dbt, uint256 _rbt, string memory _organ, uint256 _dqty, uint256 _rqty, uint256 _mqty, HLA memory _d_hla_a, HLA memory _d_hla_b, HLA memory _d_hla_c, HLA memory _d_hla_drb1, HLA memory _d_hla_dqb1, HLA memory _r_hla_a, HLA memory _r_hla_b, HLA memory _r_hla_c, HLA memory _r_hla_drb1, HLA memory _r_hla_dqb1, string memory _dhosp, string memory _rhosp) internal {
 		matched_orgdet memory match_det = matched_orgdet({
 			donor: _donor,
 			donorage: _dage,
