@@ -77,16 +77,6 @@ library utils {
 		return string(btext);
 	}
 
-	function containsBT(uint8 _dbt, uint8[] memory _posBT) internal pure returns (bool) {
-		bool c = false;
-		for (uint8 i = 0; i < _posBT.length; i++) {
-			if (_posBT[i] == _dbt) {
-				c = true;
-			}
-		}	
-		return c;
-	}
-
     function compAll(string memory o1_all, string memory o2_all) internal pure returns (uint8) {
 		bool a = ((uint8(bytes(o1_all)[0]) - 48) * 10 + (uint8(bytes(o1_all)[1]) - 48)) == ((uint8(bytes(o2_all)[0]) - 48) * 10 + (uint8(bytes(o2_all)[1]) - 48));
         bool b = ((uint8(bytes(o1_all)[3]) - 48) * 10 + (uint8(bytes(o1_all)[4]) - 48)) == ((uint8(bytes(o2_all)[3]) - 48) * 10 + (uint8(bytes(o2_all)[4]) - 48));
@@ -150,39 +140,5 @@ library utils {
 			report:_report
 		});
         _list.push(newEntry);
-	}
-
-	function initProcessing(uint256 i, orgdet[] storage donorList, orgdet[] storage recipientList, matched_orgdet[] storage matchedList, uint8 mS, persInfo memory _d_info, string memory _org, uint8 _d_qty, HLA memory _d_rep, persInfo memory _r_info, uint8 _r_qty, HLA memory _r_rep, uint8 _mode) internal {
-		if (_mode == 0) {
-			uint8 matchPC = (mS/10) * 100;
-			emit MatchFound(_r_info, _org, _r_qty, matchPC);
-			int8 pendingqty = int8(_d_qty) - int8(_r_qty);
-			if (pendingqty > 0) {
-				utils.pushMatch(matchedList, _d_info, _r_info, _org, _d_qty, _r_qty, _r_qty, _d_rep, _r_rep);
-				utils.pushNew(donorList, _d_info, _org, uint8(pendingqty), _d_rep);
-				utils.pop(recipientList, i);
-			} else if (pendingqty == 0) {
-				utils.pushMatch(matchedList, _d_info, _r_info, _org, _d_qty, _r_qty, _r_qty, _d_rep, _r_rep);
-				utils.pop(recipientList, i);
-			} else {
-				utils.pushMatch(matchedList, _d_info, _r_info, _org, _d_qty, _r_qty, _r_qty, _d_rep, _r_rep);
-				recipientList[i].quantity = uint8(pendingqty * -1);
-			}
-		} else {
-			uint8 matchPC = (mS/10) * 100;
-			emit MatchFound(_d_info, _org, _d_qty, matchPC);
-			int8 remainingqty = int8(_r_qty) - int8(_d_qty);
-			if (remainingqty > 0 ) {
-				utils.pushMatch(matchedList, _d_info, _r_info, _org, _d_qty, _r_qty, _d_qty, _d_rep, _r_rep);
-				utils.pushNew(recipientList, _r_info, _org, uint8(remainingqty), _r_rep);
-				utils.pop(donorList, i);
-			} else if (remainingqty == 0) {
-				utils.pushMatch(matchedList, _d_info, _r_info, _org, _d_qty, _r_qty, _d_qty, _d_rep, _r_rep);
-				utils.pop(donorList, i);
-			} else {
-				utils.pushMatch(matchedList, _d_info, _r_info, _org, _d_qty, _r_qty, _d_qty, _d_rep, _r_rep);
-				donorList[i].quantity = uint8(remainingqty * -1);
-			}
-		}
 	}
 }
