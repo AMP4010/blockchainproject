@@ -2,63 +2,64 @@
 pragma solidity ^0.8.26;
 
 library utils {
-    struct HLA {
-		string allele1;
-		string allele2;
-	}
-
-	struct orgdet {
-		string owner;
-		uint256 age;
-		uint256 bloodtype;
-		string organ;
-		uint256 quantity;
-		HLA hla_a;
-		HLA hla_b;
-		HLA hla_c;
-		HLA hla_drb1;
-		HLA hla_dqb1;
+	struct persInfo {
+		string name;
+		uint8 age;
+		uint8 bloodtype;
 		string hospital;
 	}
 
-	struct matched_orgdet {
-		string donor;
-		uint256 donorage;
-		string recipient;
-		uint256 recipientage;
-		uint256 donorbloodtype;
-		uint256 recipientbloodtype;
-		string organ;
-		uint256 donorquantity;
-		uint256 recipientquantity;
-		uint256 matchedquantity;
-		HLA don_hla_a;
-		HLA don_hla_b;
-		HLA don_hla_c;
-		HLA don_hla_drb1;
-		HLA don_hla_dqb1;
-		HLA rec_hla_a;
-		HLA rec_hla_b;
-		HLA rec_hla_c;
-		HLA rec_hla_drb1;
-		HLA rec_hla_dqb1;
-		string donorhosp;
-		string recipienthosp;
+    struct HLA {
+		string a1;
+		string a2;
+		string b1;
+		string b2;
+		string c1;
+		string c2;
+		string drb1_1;
+		string drb1_2;
+		string dqb1_1;
+		string dqb1_2;
 	}
 
-	function getPosBT(uint256 _bloodtype, uint256[10][10] storage _compatMatrix, uint256[] storage _posBT, uint256 _mode) internal {
+	struct orgdet {
+		persInfo info;
+		string organ;
+		uint8 quantity;
+		HLA report;
+	}
+
+	struct matched_orgdet {
+		persInfo donInfo;
+		persInfo recInfo;
+		string organ;
+		uint8 donorquantity;
+		uint8 recipientquantity;
+		uint8 matchedquantity;
+		HLA don_rep;
+		HLA rec_rep;
+	}
+
+	event MatchFound(
+		utils.persInfo info,
+		string organ,
+		uint8 qty,
+		uint8 matchPC
+	);
+
+	function getPosBT(uint8 _bloodtype, uint8[10][10] memory _compatMatrix, uint8[] storage _posBT, uint8 _mode) internal {
 		if (_bloodtype == 8 || _bloodtype == 9) {
 			_posBT.push(_bloodtype);
 			return;
 		}
 		if (_mode == 0) {
-			for (uint256 i = 0; i < 8; i++) {
+			for (uint8 i = 0; i < 8; i++) {
 				if (_compatMatrix[i][_bloodtype] == 1) {
 					_posBT.push(i);
 				}
 			}
 		} else {
-			for (uint256 i = 0; i < 8; i++) {
+			for (uint8 i = 0; i < 8; i++) {
 				if (_compatMatrix[_bloodtype][i] == 1) {
 					_posBT.push(i);
 				}
@@ -76,14 +77,21 @@ library utils {
 		return string(btext);
 	}
 
-    function compAll(string memory o1_all, string memory o2_all) internal pure returns (uint256) {
-		uint256 a1 = (uint8(bytes(o1_all)[0]) - 48) * 10 + (uint8(bytes(o1_all)[1]) - 48);
-        uint256 a2 = (uint8(bytes(o2_all)[0]) - 48) * 10 + (uint8(bytes(o2_all)[1]) - 48);
-        uint256 b1 = (uint8(bytes(o1_all)[3]) - 48) * 10 + (uint8(bytes(o1_all)[4]) - 48);
-        uint256 b2 = (uint8(bytes(o2_all)[3]) - 48) * 10 + (uint8(bytes(o2_all)[4]) - 48);
-		uint256 c1 = (uint8(bytes(o1_all)[6]) - 48) * 10 + (uint8(bytes(o1_all)[7]) - 48);
-        uint256 c2 = (uint8(bytes(o2_all)[6]) - 48) * 10 + (uint8(bytes(o2_all)[7]) - 48);
-		if (a1 == a2 && b1 == b2 && c1 == c2) {
+	function containsBT(uint8 _dbt, uint8[] memory _posBT) internal pure returns (bool) {
+		bool c = false;
+		for (uint8 i = 0; i < _posBT.length; i++) {
+			if (_posBT[i] == _dbt) {
+				c = true;
+			}
+		}	
+		return c;
+	}
+
+    function compAll(string memory o1_all, string memory o2_all) internal pure returns (uint8) {
+		bool a = ((uint8(bytes(o1_all)[0]) - 48) * 10 + (uint8(bytes(o1_all)[1]) - 48)) == ((uint8(bytes(o2_all)[0]) - 48) * 10 + (uint8(bytes(o2_all)[1]) - 48));
+        bool b = ((uint8(bytes(o1_all)[3]) - 48) * 10 + (uint8(bytes(o1_all)[4]) - 48)) == ((uint8(bytes(o2_all)[3]) - 48) * 10 + (uint8(bytes(o2_all)[4]) - 48));
+		bool c = ((uint8(bytes(o1_all)[6]) - 48) * 10 + (uint8(bytes(o1_all)[7]) - 48)) == ((uint8(bytes(o2_all)[6]) - 48) * 10 + (uint8(bytes(o2_all)[7]) - 48));
+		if (a && b && c) {
 			return 1;
 		} else {
 			return 0;
@@ -104,17 +112,12 @@ library utils {
         return cat;
     }
 
-	function getHLA(string memory a, string memory b, string memory c, string memory d,
-                    string memory e, string memory f, string memory g, string memory h, 
-                    string memory i, string memory j, string memory k, string memory l, 
-                    string memory m, string memory n, string memory o, string memory p, 
-                    string memory q, string memory r, string memory s, string memory t, 
-                    uint256 min) internal pure returns (uint256) {
-		min += compAll(a, b) + compAll(c, d);
-		min += compAll(e, f) + compAll(g, h);
-		min += compAll(i, j) + compAll(k, l);
-		min += compAll(m, n) + compAll(o, p);
-		min += compAll(q, r) + compAll(s, t);
+	function getHLA(HLA memory _don_rep, HLA memory _rec_rep, uint8 min) internal pure returns (uint8) {
+		min += compAll(_don_rep.a1, _rec_rep.a1) + compAll(_don_rep.a2, _rec_rep.a2);
+		min += compAll(_don_rep.b1, _rec_rep.b1) + compAll(_don_rep.b2, _rec_rep.b2);
+		min += compAll(_don_rep.c1, _rec_rep.c1) + compAll(_don_rep.c2, _rec_rep.c2);
+		min += compAll(_don_rep.drb1_1, _rec_rep.drb1_1) + compAll(_don_rep.drb1_2, _rec_rep.drb1_2);
+		min += compAll(_don_rep.dqb1_1, _rec_rep.dqb1_1) + compAll(_don_rep.dqb1_2, _rec_rep.dqb1_2);
 		return min;
 	}
 
@@ -125,48 +128,61 @@ library utils {
 		_list.pop();
 	}
 
-	function pushMatch(matched_orgdet[] storage _matchedList, string memory _donor, uint256 _dage, string memory _recipient, uint256 _rage, uint256 _dbt, uint256 _rbt, string memory _organ, uint256 _dqty, uint256 _rqty, uint256 _mqty, HLA memory _d_hla_a, HLA memory _d_hla_b, HLA memory _d_hla_c, HLA memory _d_hla_drb1, HLA memory _d_hla_dqb1, HLA memory _r_hla_a, HLA memory _r_hla_b, HLA memory _r_hla_c, HLA memory _r_hla_drb1, HLA memory _r_hla_dqb1, string memory _dhosp, string memory _rhosp) internal {
+	function pushMatch(matched_orgdet[] storage _matchedList, persInfo memory _donInfo, persInfo memory _recInfo, string memory _organ, uint8 _dqty, uint8 _rqty, uint8 _mqty, HLA memory _don_rep, HLA memory _rec_rep) internal {
 		matched_orgdet memory match_det = matched_orgdet({
-			donor: _donor,
-			donorage: _dage,
-			recipient: _recipient,
-			recipientage: _rage,
-			donorbloodtype: _dbt,
-			recipientbloodtype: _rbt,
+			donInfo: _donInfo,
+			recInfo: _recInfo,
 			organ: _organ,
 			donorquantity: _dqty,
 			recipientquantity: _rqty,
 			matchedquantity: _mqty,
-            don_hla_a: _d_hla_a,
-			don_hla_b: _d_hla_b,
-			don_hla_c: _d_hla_c,
-			don_hla_drb1: _d_hla_drb1,
-			don_hla_dqb1: _d_hla_dqb1,
-			rec_hla_a: _r_hla_a,
-			rec_hla_b: _r_hla_b,
-			rec_hla_c: _r_hla_c,
-			rec_hla_drb1: _r_hla_drb1,
-			rec_hla_dqb1: _r_hla_dqb1,
-			donorhosp: _dhosp,
-			recipienthosp: _rhosp
+            don_rep: _don_rep,
+			rec_rep: _rec_rep
 		});
 		_matchedList.push(match_det);
 	}
 
-	function pushNew(orgdet[] storage _list, string memory _owner, uint256 _age, uint256 _bloodtype, string memory _organ, uint256 _quantity, HLA memory _hla_a, HLA memory _hla_b, HLA memory _hla_c, HLA memory _hla_drb1, HLA memory _hla_dqb1, string memory _hospital) internal {
+	function pushNew(orgdet[] storage _list, persInfo memory _persInfo, string memory _organ, uint8 _quantity, HLA memory _report) internal {
 		orgdet memory newEntry = orgdet({
-			owner: _owner,
-			age: _age,
-			bloodtype: _bloodtype,
+			info: _persInfo,
 			organ: _organ,
-			quantity: uint256(_quantity),
-			hla_a: _hla_a,
-			hla_b: _hla_b,
-			hla_c: _hla_c,
-			hla_drb1: _hla_drb1,
-			hla_dqb1: _hla_dqb1,
-			hospital: _hospital
+			quantity: _quantity,
+			report:_report
 		});
         _list.push(newEntry);
+	}
+
+	function initProcessing(uint256 i, orgdet[] storage donorList, orgdet[] storage recipientList, matched_orgdet[] storage matchedList, uint8 mS, persInfo memory _d_info, string memory _org, uint8 _d_qty, HLA memory _d_rep, persInfo memory _r_info, uint8 _r_qty, HLA memory _r_rep, uint8 _mode) internal {
+		if (_mode == 0) {
+			uint8 matchPC = (mS/10) * 100;
+			emit MatchFound(_r_info, _org, _r_qty, matchPC);
+			int8 pendingqty = int8(_d_qty) - int8(_r_qty);
+			if (pendingqty > 0) {
+				utils.pushMatch(matchedList, _d_info, _r_info, _org, _d_qty, _r_qty, _r_qty, _d_rep, _r_rep);
+				utils.pushNew(donorList, _d_info, _org, uint8(pendingqty), _d_rep);
+				utils.pop(recipientList, i);
+			} else if (pendingqty == 0) {
+				utils.pushMatch(matchedList, _d_info, _r_info, _org, _d_qty, _r_qty, _r_qty, _d_rep, _r_rep);
+				utils.pop(recipientList, i);
+			} else {
+				utils.pushMatch(matchedList, _d_info, _r_info, _org, _d_qty, _r_qty, _r_qty, _d_rep, _r_rep);
+				recipientList[i].quantity = uint8(pendingqty * -1);
+			}
+		} else {
+			uint8 matchPC = (mS/10) * 100;
+			emit MatchFound(_d_info, _org, _d_qty, matchPC);
+			int8 remainingqty = int8(_r_qty) - int8(_d_qty);
+			if (remainingqty > 0 ) {
+				utils.pushMatch(matchedList, _d_info, _r_info, _org, _d_qty, _r_qty, _d_qty, _d_rep, _r_rep);
+				utils.pushNew(recipientList, _r_info, _org, uint8(remainingqty), _r_rep);
+				utils.pop(donorList, i);
+			} else if (remainingqty == 0) {
+				utils.pushMatch(matchedList, _d_info, _r_info, _org, _d_qty, _r_qty, _d_qty, _d_rep, _r_rep);
+				utils.pop(donorList, i);
+			} else {
+				utils.pushMatch(matchedList, _d_info, _r_info, _org, _d_qty, _r_qty, _d_qty, _d_rep, _r_rep);
+				donorList[i].quantity = uint8(remainingqty * -1);
+			}
+		}
 	}
 }
