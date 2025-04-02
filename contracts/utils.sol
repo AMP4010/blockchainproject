@@ -67,16 +67,6 @@ library utils {
 		}
 	}
 
-    function lowerString(string memory _text) internal pure returns (string memory) {
-		bytes memory btext = bytes(_text);
-		for (uint256 i = 0; i < btext.length; i++) {
-			if (btext[i] >= 0x41 && btext[i] <= 0x5A) {
-                btext[i] = bytes1(uint8(btext[i]) + 32);
-            }
-		}
-		return string(btext);
-	}
-
     function compAll(string memory o1_all, string memory o2_all) internal pure returns (uint8) {
 		bool a = ((uint8(bytes(o1_all)[0]) - 48) * 10 + (uint8(bytes(o1_all)[1]) - 48)) == ((uint8(bytes(o2_all)[0]) - 48) * 10 + (uint8(bytes(o2_all)[1]) - 48));
         bool b = ((uint8(bytes(o1_all)[3]) - 48) * 10 + (uint8(bytes(o1_all)[4]) - 48)) == ((uint8(bytes(o2_all)[3]) - 48) * 10 + (uint8(bytes(o2_all)[4]) - 48));
@@ -88,7 +78,7 @@ library utils {
 		}
 	}
 
-    function getHlaCat(string memory _organ, mapping(uint256 => string[]) storage minHLA) internal view returns (uint256) {
+    function getHlaCat(string memory _organ, mapping(uint8 => string[]) storage minHLA) internal view returns (uint256) {
         uint8[5] memory minScores = [9, 7, 5, 2, 0];
         uint256 cat;
         for (uint256 i = 0; i < minScores.length; i++) {

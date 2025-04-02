@@ -8,7 +8,7 @@ contract main {
     bytes32 private donorPass;
     bytes32 private recipientPass;
     bytes32 private matchedPass;
-    mapping(uint256 => string[]) private minHLA;
+    mapping(uint8 => string[]) private minHLA;
 
     constructor (string memory _donorPass, string memory _recipientPass, string memory _matchedPass) {
         donorPass = keccak256(abi.encodePacked(_donorPass));
@@ -21,28 +21,33 @@ contract main {
         minHLA[0] = ["cornea", "heart valve", "liver"];
     }
 
+    function passCheck(string memory _pass, bytes32 _PASS) private pure {
+        require(keccak256(abi.encodePacked(_pass)) == _PASS);
+    }
+
     modifier dlPassCheck(string memory _pass) {
-        require(keccak256(abi.encodePacked(_pass)) == donorPass, "Incorrect password!");
+        passCheck(_pass, donorPass);
         _;
     }
 
     modifier rlPassCheck(string memory _pass) {
-        require(keccak256(abi.encodePacked(_pass)) == recipientPass, "Incorrect password!");
+        passCheck(_pass, recipientPass);
         _;
     }
 
     modifier mlPassCheck(string memory _pass) {
-        require(keccak256(abi.encodePacked(_pass)) == matchedPass, "Incorrect password!");
+        passCheck(_pass, matchedPass);
         _;
     }
 
     event MatchFound(
         utils.persInfo info,
         string organ,
-        uint8 qty,
-        uint8 matchPC
+        uint8 mP,
+        uint8 qty
     );
 
+    uint8[] private posBT;
     utils.orgdet[] private donorList;
     utils.orgdet[] private recipientList;
     utils.matched_orgdet[] private matchedList;
@@ -60,14 +65,10 @@ contract main {
                                            [0, 0, 0, 0, 0, 0, 0, 0, 1, 0],
                                            [0, 0, 0, 0, 0, 0, 0, 0, 0, 1]];
 
-    uint8[] private posBT;
-    uint8[5] private minScores = [9, 7, 5, 2, 0];
-
     function regDonor(utils.persInfo memory _info, string memory _organ, uint8 _quantity, utils.HLA memory _report) external {
 
         delete posBT;
         utils.getPosBT(_info.bloodtype, compatMatrix, posBT, 0);
-        _organ = utils.lowerString(_organ);
         bool matchFound = false;
 
         for (uint256 i = 0; i < recipientList.length; i++) {
@@ -78,8 +79,7 @@ contract main {
                         matchScore = utils.getHLA(_report, recipientList[i].report, matchScore);
                         if (matchScore >= utils.getHlaCat(_organ, minHLA)) {
                             matchFound = true;
-                            uint8 matchPC = (matchScore/10) * 100;
-                            emit MatchFound(recipientList[i].info, recipientList[i].organ, recipientList[i].quantity, matchPC);
+                            emit MatchFound(recipientList[i].info, recipientList[i].organ, recipientList[i].quantity, (matchScore*10));
                             int8 pendingqty = int8(_quantity) - int8(recipientList[i].quantity);
                             if (pendingqty > 0) {
                                 utils.pushMatch(matchedList, _info, recipientList[i].info, _organ, _quantity, recipientList[i].quantity, recipientList[i].quantity, _report, recipientList[i].report);
@@ -110,7 +110,6 @@ contract main {
 
         delete posBT;
         utils.getPosBT(_info.bloodtype, compatMatrix, posBT, 1);
-        _organ = utils.lowerString(_organ);
         bool matchFound = false;
 
         for (uint256 i = 0; i < donorList.length; i++) {
@@ -121,8 +120,7 @@ contract main {
                         matchScore = utils.getHLA(_report, donorList[i].report, matchScore);
                         if (matchScore >= utils.getHlaCat(_organ, minHLA)) {
                             matchFound = true;
-                            uint8 matchPC = (matchScore/10) * 100;
-                            emit MatchFound(donorList[i].info, donorList[i].organ, donorList[i].quantity, matchPC);
+                            emit MatchFound(donorList[i].info, donorList[i].organ, donorList[i].quantity, matchScore*10);
                             int8 remainingqty = int8(_quantity) - int8(donorList[i].quantity);
                             if (remainingqty > 0 ) {
                         	    utils.pushMatch(matchedList, donorList[i].info, _info, _organ, donorList[i].quantity, _quantity, donorList[i].quantity, donorList[i].report, _report);
@@ -149,7 +147,7 @@ contract main {
         }
     }
 
-    function showDonors(string memory _pass) public view dlPassCheck(_pass) returns (utils.orgdet[] memory) {
+    function showDonors(string memory _pass) external view dlPassCheck(_pass) returns (utils.orgdet[] memory) {
         return donorList;
     }
 
