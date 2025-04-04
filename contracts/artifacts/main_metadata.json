@@ -9,21 +9,11 @@
 				"inputs": [
 					{
 						"internalType": "string",
-						"name": "_donorPass",
-						"type": "string"
-					},
-					{
-						"internalType": "string",
-						"name": "_recipientPass",
-						"type": "string"
-					},
-					{
-						"internalType": "string",
-						"name": "_matchedPass",
+						"name": "_adminPass",
 						"type": "string"
 					}
 				],
-				"stateMutability": "nonpayable",
+				"stateMutability": "payable",
 				"type": "constructor"
 			},
 			{
@@ -289,333 +279,14 @@
 						"internalType": "string",
 						"name": "_pass",
 						"type": "string"
-					}
-				],
-				"name": "showDonors",
-				"outputs": [
+					},
 					{
-						"components": [
-							{
-								"components": [
-									{
-										"internalType": "string",
-										"name": "name",
-										"type": "string"
-									},
-									{
-										"internalType": "uint8",
-										"name": "age",
-										"type": "uint8"
-									},
-									{
-										"internalType": "uint8",
-										"name": "bloodtype",
-										"type": "uint8"
-									},
-									{
-										"internalType": "string",
-										"name": "hospital",
-										"type": "string"
-									}
-								],
-								"internalType": "struct utils.persInfo",
-								"name": "info",
-								"type": "tuple"
-							},
-							{
-								"internalType": "string",
-								"name": "organ",
-								"type": "string"
-							},
-							{
-								"internalType": "uint8",
-								"name": "quantity",
-								"type": "uint8"
-							},
-							{
-								"components": [
-									{
-										"internalType": "string",
-										"name": "a1",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "a2",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "b1",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "b2",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "c1",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "c2",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "drb1_1",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "drb1_2",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "dqb1_1",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "dqb1_2",
-										"type": "string"
-									}
-								],
-								"internalType": "struct utils.HLA",
-								"name": "report",
-								"type": "tuple"
-							}
-						],
-						"internalType": "struct utils.orgdet[]",
-						"name": "",
-						"type": "tuple[]"
+						"internalType": "uint8",
+						"name": "c",
+						"type": "uint8"
 					}
 				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "string",
-						"name": "_pass",
-						"type": "string"
-					}
-				],
-				"name": "showMatches",
-				"outputs": [
-					{
-						"components": [
-							{
-								"components": [
-									{
-										"internalType": "string",
-										"name": "name",
-										"type": "string"
-									},
-									{
-										"internalType": "uint8",
-										"name": "age",
-										"type": "uint8"
-									},
-									{
-										"internalType": "uint8",
-										"name": "bloodtype",
-										"type": "uint8"
-									},
-									{
-										"internalType": "string",
-										"name": "hospital",
-										"type": "string"
-									}
-								],
-								"internalType": "struct utils.persInfo",
-								"name": "donInfo",
-								"type": "tuple"
-							},
-							{
-								"components": [
-									{
-										"internalType": "string",
-										"name": "name",
-										"type": "string"
-									},
-									{
-										"internalType": "uint8",
-										"name": "age",
-										"type": "uint8"
-									},
-									{
-										"internalType": "uint8",
-										"name": "bloodtype",
-										"type": "uint8"
-									},
-									{
-										"internalType": "string",
-										"name": "hospital",
-										"type": "string"
-									}
-								],
-								"internalType": "struct utils.persInfo",
-								"name": "recInfo",
-								"type": "tuple"
-							},
-							{
-								"internalType": "string",
-								"name": "organ",
-								"type": "string"
-							},
-							{
-								"internalType": "uint8",
-								"name": "donorquantity",
-								"type": "uint8"
-							},
-							{
-								"internalType": "uint8",
-								"name": "recipientquantity",
-								"type": "uint8"
-							},
-							{
-								"internalType": "uint8",
-								"name": "matchedquantity",
-								"type": "uint8"
-							},
-							{
-								"components": [
-									{
-										"internalType": "string",
-										"name": "a1",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "a2",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "b1",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "b2",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "c1",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "c2",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "drb1_1",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "drb1_2",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "dqb1_1",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "dqb1_2",
-										"type": "string"
-									}
-								],
-								"internalType": "struct utils.HLA",
-								"name": "don_rep",
-								"type": "tuple"
-							},
-							{
-								"components": [
-									{
-										"internalType": "string",
-										"name": "a1",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "a2",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "b1",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "b2",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "c1",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "c2",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "drb1_1",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "drb1_2",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "dqb1_1",
-										"type": "string"
-									},
-									{
-										"internalType": "string",
-										"name": "dqb1_2",
-										"type": "string"
-									}
-								],
-								"internalType": "struct utils.HLA",
-								"name": "rec_rep",
-								"type": "tuple"
-							}
-						],
-						"internalType": "struct utils.matched_orgdet[]",
-						"name": "",
-						"type": "tuple[]"
-					}
-				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "string",
-						"name": "_pass",
-						"type": "string"
-					}
-				],
-				"name": "showRecipient",
+				"name": "showLists",
 				"outputs": [
 					{
 						"components": [
@@ -745,25 +416,25 @@
 		},
 		"optimizer": {
 			"enabled": true,
-			"runs": 10
+			"runs": 5999
 		},
 		"remappings": []
 	},
 	"sources": {
 		"contracts/main.sol": {
-			"keccak256": "0xfdb9af7953eb066864c50eea19b57082c0fcb0aea3e95bfe6e55aaad024cac85",
+			"keccak256": "0x54a9e53f58b7f04269d805467f409d5668c7a79584a6ec39f97256b67d2ee7d0",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://8215199116d35c40984b1eac000835d669ea276cd7713ff483e2bc5a3d5e5456",
-				"dweb:/ipfs/Qme9PEzbN8jX3Qd82CzNpoD7WzDDhthg1qaDaKsEXuKyFV"
+				"bzz-raw://f80263a61fd6e01d72ce0da89710c60511bf642dcfbccc5aaec8b41a139d9130",
+				"dweb:/ipfs/QmXJ2Yis4GbVmPzUQX7H5TAqtyQuiWGLn4hmhR7JSg3SLq"
 			]
 		},
 		"contracts/utils.sol": {
-			"keccak256": "0x9bbece68df6b13e228b281d06511edc7e72a8774341b1e98c3e66fb58f7d9423",
+			"keccak256": "0xc3c840dc3f6009bfb58d1bfe356a722fe55d2ee0ddc52465df2c2d24c6882e9e",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://85ddbbff97ee3061a6820e4a57318a056304e64c06739e59d2b9fb45b108069d",
-				"dweb:/ipfs/QmS5TZYjYZbAaGkE5aQU8UMEnbmLfSjwukK322rdLxZBKk"
+				"bzz-raw://5feddfbf0205c142088a2258dc02edb3509ff20601495ff747cd073b5e0a599d",
+				"dweb:/ipfs/QmckaXy1a4Z76tYVLSZVsW16LA1mxvSxv6knPrNCeFRg9g"
 			]
 		}
 	},

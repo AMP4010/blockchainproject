@@ -47,58 +47,65 @@ library utils {
 		uint8 matchPC
 	);
 
+    function passCheck(bytes32 _pass, bytes32 _PASS) internal pure {
+        require(_pass == _PASS);
+    }
+
+	function del(uint8[] storage _list) internal {
+		while (_list.length > 0) {
+			_list.pop();
+		}
+	}
+
 	function getPosBT(uint8 _bloodtype, uint8[10][10] memory _compatMatrix, uint8[] storage _posBT, uint8 _mode) internal {
 		if (_bloodtype == 8 || _bloodtype == 9) {
 			_posBT.push(_bloodtype);
 			return;
-		}
-		if (_mode == 0) {
-			for (uint8 i = 0; i < 8; i++) {
-				if (_compatMatrix[i][_bloodtype] == 1) {
-					_posBT.push(i);
-				}
-			}
 		} else {
-			for (uint8 i = 0; i < 8; i++) {
-				if (_compatMatrix[_bloodtype][i] == 1) {
-					_posBT.push(i);
+			if (_mode == 0) {
+				for (uint8 i = 0; i < 8; i++) {
+					if (_compatMatrix[i][_bloodtype] == 1) {
+						_posBT.push(i);
+					}
+				}
+			} else {
+				for (uint8 i = 0; i < 8; i++) {
+					if (_compatMatrix[_bloodtype][i] == 1) {
+						_posBT.push(i);
+					}
 				}
 			}
 		}
 	}
 
     function compAll(string memory o1_all, string memory o2_all) internal pure returns (uint8) {
-		bool a = ((uint8(bytes(o1_all)[0]) - 48) * 10 + (uint8(bytes(o1_all)[1]) - 48)) == ((uint8(bytes(o2_all)[0]) - 48) * 10 + (uint8(bytes(o2_all)[1]) - 48));
-        bool b = ((uint8(bytes(o1_all)[3]) - 48) * 10 + (uint8(bytes(o1_all)[4]) - 48)) == ((uint8(bytes(o2_all)[3]) - 48) * 10 + (uint8(bytes(o2_all)[4]) - 48));
-		bool c = ((uint8(bytes(o1_all)[6]) - 48) * 10 + (uint8(bytes(o1_all)[7]) - 48)) == ((uint8(bytes(o2_all)[6]) - 48) * 10 + (uint8(bytes(o2_all)[7]) - 48));
-		if (a && b && c) {
-			return 1;
+		if (((uint8(bytes(o1_all)[0]) - 48) * 10 + (uint8(bytes(o1_all)[1]) - 48)) == ((uint8(bytes(o2_all)[0]) - 48) * 10 + (uint8(bytes(o2_all)[1]) - 48)) &&
+        	((uint8(bytes(o1_all)[3]) - 48) * 10 + (uint8(bytes(o1_all)[4]) - 48)) == ((uint8(bytes(o2_all)[3]) - 48) * 10 + (uint8(bytes(o2_all)[4]) - 48)) &&
+			((uint8(bytes(o1_all)[6]) - 48) * 10 + (uint8(bytes(o1_all)[7]) - 48)) == ((uint8(bytes(o2_all)[6]) - 48) * 10 + (uint8(bytes(o2_all)[7]) - 48))) {
+				return 1;
 		} else {
 			return 0;
 		}
 	}
 
-    function getHlaCat(string memory _organ, mapping(uint8 => string[]) storage minHLA) internal view returns (uint256) {
+    function getHlaCat(string memory _organ, mapping(uint8 => string[]) storage _minHLA) internal view returns (uint256 cat) {
         uint8[5] memory minScores = [9, 7, 5, 2, 0];
-        uint256 cat;
         for (uint256 i = 0; i < minScores.length; i++) {
-            string[] memory organs = minHLA[minScores[i]];
+            string[] memory organs = _minHLA[minScores[i]];
             for (uint256 j = 0; j < organs.length; j++) {
                 if (keccak256(bytes(organs[j])) == keccak256(bytes(_organ))) {
                     cat = minScores[i];
                 }
             }
 		}
-        return cat;
     }
 
-	function getHLA(HLA memory _don_rep, HLA memory _rec_rep, uint8 min) internal pure returns (uint8) {
-		min += compAll(_don_rep.a1, _rec_rep.a1) + compAll(_don_rep.a2, _rec_rep.a2);
-		min += compAll(_don_rep.b1, _rec_rep.b1) + compAll(_don_rep.b2, _rec_rep.b2);
-		min += compAll(_don_rep.c1, _rec_rep.c1) + compAll(_don_rep.c2, _rec_rep.c2);
-		min += compAll(_don_rep.drb1_1, _rec_rep.drb1_1) + compAll(_don_rep.drb1_2, _rec_rep.drb1_2);
-		min += compAll(_don_rep.dqb1_1, _rec_rep.dqb1_1) + compAll(_don_rep.dqb1_2, _rec_rep.dqb1_2);
-		return min;
+	function getHLA(HLA memory _don_rep, HLA memory _rec_rep) internal pure returns (uint8) {
+		return 0 + compAll(_don_rep.a1, _rec_rep.a1) + compAll(_don_rep.a2, _rec_rep.a2) +
+				   compAll(_don_rep.b1, _rec_rep.b1) + compAll(_don_rep.b2, _rec_rep.b2) +
+				   compAll(_don_rep.c1, _rec_rep.c1) + compAll(_don_rep.c2, _rec_rep.c2) +
+				   compAll(_don_rep.drb1_1, _rec_rep.drb1_1) + compAll(_don_rep.drb1_2, _rec_rep.drb1_2) +
+				   compAll(_don_rep.dqb1_1, _rec_rep.dqb1_1) + compAll(_don_rep.dqb1_2, _rec_rep.dqb1_2);
 	}
 
 	function pop(orgdet[] storage _list, uint256 _i) internal {
@@ -109,7 +116,7 @@ library utils {
 	}
 
 	function pushMatch(matched_orgdet[] storage _matchedList, persInfo memory _donInfo, persInfo memory _recInfo, string memory _organ, uint8 _dqty, uint8 _rqty, uint8 _mqty, HLA memory _don_rep, HLA memory _rec_rep) internal {
-		matched_orgdet memory match_det = matched_orgdet({
+		matched_orgdet memory newEntry = matched_orgdet({
 			donInfo: _donInfo,
 			recInfo: _recInfo,
 			organ: _organ,
@@ -119,7 +126,7 @@ library utils {
             don_rep: _don_rep,
 			rec_rep: _rec_rep
 		});
-		_matchedList.push(match_det);
+		_matchedList.push(newEntry);
 	}
 
 	function pushNew(orgdet[] storage _list, persInfo memory _persInfo, string memory _organ, uint8 _quantity, HLA memory _report) internal {

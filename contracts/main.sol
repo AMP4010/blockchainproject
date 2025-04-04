@@ -5,15 +5,11 @@ pragma solidity ^0.8.26;
 import "./utils.sol";
 
 contract main {
-    bytes32 private donorPass;
-    bytes32 private recipientPass;
-    bytes32 private matchedPass;
+    bytes32 private adminPass;
     mapping(uint8 => string[]) private minHLA;
 
-    constructor (string memory _donorPass, string memory _recipientPass, string memory _matchedPass) {
-        donorPass = keccak256(abi.encodePacked(_donorPass));
-        recipientPass = keccak256(abi.encodePacked(_recipientPass));
-        matchedPass = keccak256(abi.encodePacked(_matchedPass));
+    constructor (string memory _adminPass) payable {
+        adminPass = keccak256(abi.encode(_adminPass));
         minHLA[9] = ["blood stem cell", "bone marrow"];
         minHLA[7] = ["arm", "eye", "face", "hand", "leg", "penis", "scalp", "thymus"];
         minHLA[5] = ["abdominal wall", "adrenal gland", "bone", "esophagus", "larynx", "lymph node", "nail bed", "nerve", "ovary", "pancreas", "skin", "small intestine", "spleen", "stomach", "testicle", "trachea", "uterus"];
@@ -21,22 +17,8 @@ contract main {
         minHLA[0] = ["cornea", "heart valve", "liver"];
     }
 
-    function passCheck(string memory _pass, bytes32 _PASS) private pure {
-        require(keccak256(abi.encodePacked(_pass)) == _PASS);
-    }
-
-    modifier dlPassCheck(string memory _pass) {
-        passCheck(_pass, donorPass);
-        _;
-    }
-
-    modifier rlPassCheck(string memory _pass) {
-        passCheck(_pass, recipientPass);
-        _;
-    }
-
-    modifier mlPassCheck(string memory _pass) {
-        passCheck(_pass, matchedPass);
+    modifier PassCheck(bytes32 _pass) {
+        utils.passCheck(_pass, adminPass);
         _;
     }
 
@@ -67,7 +49,7 @@ contract main {
 
     function regDonor(utils.persInfo memory _info, string memory _organ, uint8 _quantity, utils.HLA memory _report) external {
 
-        delete posBT;
+        utils.del(posBT);
         utils.getPosBT(_info.bloodtype, compatMatrix, posBT, 0);
         bool matchFound = false;
 
@@ -75,8 +57,7 @@ contract main {
             if (keccak256(bytes(recipientList[i].organ)) == keccak256(bytes(_organ))) {
                 for (uint8 j = 0; j < posBT.length; j++) {
                     if (recipientList[i].info.bloodtype == posBT[j]) {
-                        uint8 matchScore = 0;
-                        matchScore = utils.getHLA(_report, recipientList[i].report, matchScore);
+                        uint8 matchScore = utils.getHLA(_report, recipientList[i].report);
                         if (matchScore >= utils.getHlaCat(_organ, minHLA)) {
                             matchFound = true;
                             emit MatchFound(recipientList[i].info, recipientList[i].organ, recipientList[i].quantity, (matchScore*10));
@@ -108,7 +89,7 @@ contract main {
 
     function regRecipient(utils.persInfo memory _info, string memory _organ, uint8 _quantity, utils.HLA memory _report) external {
 
-        delete posBT;
+        utils.del(posBT);
         utils.getPosBT(_info.bloodtype, compatMatrix, posBT, 1);
         bool matchFound = false;
 
@@ -116,8 +97,7 @@ contract main {
             if (keccak256(bytes(donorList[i].organ)) == keccak256(bytes(_organ))) {
                 for (uint8 j = 0; j < posBT.length; j++) {
                     if (donorList[i].info.bloodtype == posBT[j]) {
-                        uint8 matchScore = 0;
-                        matchScore = utils.getHLA(_report, donorList[i].report, matchScore);
+                        uint8 matchScore = utils.getHLA(_report, donorList[i].report);
                         if (matchScore >= utils.getHlaCat(_organ, minHLA)) {
                             matchFound = true;
                             emit MatchFound(donorList[i].info, donorList[i].organ, donorList[i].quantity, matchScore*10);
@@ -147,15 +127,18 @@ contract main {
         }
     }
 
-    function showDonors(string memory _pass) external view dlPassCheck(_pass) returns (utils.orgdet[] memory) {
-        return donorList;
-    }
-
-    function showRecipient(string memory _pass) public view rlPassCheck(_pass) returns (utils.orgdet[] memory) {
-        return recipientList;
-    }
-
-    function showMatches(string memory _pass) public view mlPassCheck(_pass) returns (utils.matched_orgdet[] memory) {
+    function showMatch() internal view returns (utils.matched_orgdet[] memory) {
         return matchedList;
+    }
+
+    function showLists(string memory _pass, uint8 c) external view PassCheck(keccak256(abi.encode(_pass))) returns (utils.orgdet[] memory) {
+        if (c == 3) {
+            showMatch(); 
+        }
+        if (c == 1) {
+            return donorList;
+        } else {
+            return recipientList;
+        }
     }
 }
