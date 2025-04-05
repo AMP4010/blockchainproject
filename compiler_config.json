@@ -4,7 +4,7 @@
 	"settings": {
 		"optimizer": {
 			"enabled": true,
-			"runs": 5999
+			"runs": 20000000000
 		},
 		"outputSelection": {
 			"*": {

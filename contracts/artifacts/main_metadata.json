@@ -416,17 +416,17 @@
 		},
 		"optimizer": {
 			"enabled": true,
-			"runs": 5999
+			"runs": 20000
 		},
 		"remappings": []
 	},
 	"sources": {
 		"contracts/main.sol": {
-			"keccak256": "0x54a9e53f58b7f04269d805467f409d5668c7a79584a6ec39f97256b67d2ee7d0",
+			"keccak256": "0x87608b52053f27b7667d0ba6ebd7e8c342930fda5407003400f5343fb37098d8",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://f80263a61fd6e01d72ce0da89710c60511bf642dcfbccc5aaec8b41a139d9130",
-				"dweb:/ipfs/QmXJ2Yis4GbVmPzUQX7H5TAqtyQuiWGLn4hmhR7JSg3SLq"
+				"bzz-raw://8ac334bf3abb390411c7680621255244878cc50cc92f42688a62c09fa55b2c55",
+				"dweb:/ipfs/QmZGcp4WH9SezequtbcaFpMoL1ngzLiAGAudnkT47PP5oi"
 			]
 		},
 		"contracts/utils.sol": {

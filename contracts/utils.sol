@@ -60,7 +60,6 @@ library utils {
 	function getPosBT(uint8 _bloodtype, uint8[10][10] memory _compatMatrix, uint8[] storage _posBT, uint8 _mode) internal {
 		if (_bloodtype == 8 || _bloodtype == 9) {
 			_posBT.push(_bloodtype);
-			return;
 		} else {
 			if (_mode == 0) {
 				for (uint8 i = 0; i < 8; i++) {
@@ -78,14 +77,11 @@ library utils {
 		}
 	}
 
-    function compAll(string memory o1_all, string memory o2_all) internal pure returns (uint8) {
-		if (((uint8(bytes(o1_all)[0]) - 48) * 10 + (uint8(bytes(o1_all)[1]) - 48)) == ((uint8(bytes(o2_all)[0]) - 48) * 10 + (uint8(bytes(o2_all)[1]) - 48)) &&
-        	((uint8(bytes(o1_all)[3]) - 48) * 10 + (uint8(bytes(o1_all)[4]) - 48)) == ((uint8(bytes(o2_all)[3]) - 48) * 10 + (uint8(bytes(o2_all)[4]) - 48)) &&
-			((uint8(bytes(o1_all)[6]) - 48) * 10 + (uint8(bytes(o1_all)[7]) - 48)) == ((uint8(bytes(o2_all)[6]) - 48) * 10 + (uint8(bytes(o2_all)[7]) - 48))) {
-				return 1;
-		} else {
-			return 0;
-		}
+    function compAll(string memory _o1_all, string memory _o2_all) internal pure returns (uint8) {
+		return (((uint8(bytes(_o1_all)[0]) - 48) * 10 + (uint8(bytes(_o1_all)[1]) - 48)) == ((uint8(bytes(_o2_all)[0]) - 48) * 10 + (uint8(bytes(_o2_all)[1]) - 48)) &&
+        		((uint8(bytes(_o1_all)[3]) - 48) * 10 + (uint8(bytes(_o1_all)[4]) - 48)) == ((uint8(bytes(_o2_all)[3]) - 48) * 10 + (uint8(bytes(_o2_all)[4]) - 48)) &&
+				((uint8(bytes(_o1_all)[6]) - 48) * 10 + (uint8(bytes(_o1_all)[7]) - 48)) == ((uint8(bytes(_o2_all)[6]) - 48) * 10 + (uint8(bytes(_o2_all)[7]) - 48))) ?
+				1 : 0;
 	}
 
     function getHlaCat(string memory _organ, mapping(uint8 => string[]) storage _minHLA) internal view returns (uint256 cat) {

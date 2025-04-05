@@ -81,7 +81,6 @@ contract main {
                 }
             }
         }
-
         if (!matchFound) {
             utils.pushNew(donorList, _info, _organ, _quantity, _report);
         }
@@ -121,7 +120,6 @@ contract main {
                 }
             }
         }
-
         if (!matchFound) {
             utils.pushNew(recipientList, _info, _organ, _quantity, _report);
         }
@@ -131,14 +129,10 @@ contract main {
         return matchedList;
     }
 
-    function showLists(string memory _pass, uint8 c) external view PassCheck(keccak256(abi.encode(_pass))) returns (utils.orgdet[] memory) {
-        if (c == 3) {
-            showMatch(); 
+    function showLists(string memory _pass, uint8 _c) external view PassCheck(keccak256(abi.encode(_pass))) returns (utils.orgdet[] memory) {
+        if (_c == 3) {
+            showMatch();
         }
-        if (c == 1) {
-            return donorList;
-        } else {
-            return recipientList;
-        }
+        return _c < 2 ? donorList : recipientList;
     }
 }
