@@ -48,7 +48,7 @@ library utils {
 	);
 
     function passCheck(bytes32 _pass, bytes32 _PASS) internal pure {
-        require(_pass == _PASS);
+        require(_pass == _PASS, "Wrong Password!");
     }
 
 	function del(uint8[] storage _list) internal {
@@ -86,6 +86,7 @@ library utils {
 
     function getHlaCat(string memory _organ, mapping(uint8 => string[]) storage _minHLA) internal view returns (uint256 cat) {
         uint8[5] memory minScores = [9, 7, 5, 2, 0];
+		cat = 9;
         for (uint256 i = 0; i < minScores.length; i++) {
             string[] memory organs = _minHLA[minScores[i]];
             for (uint256 j = 0; j < organs.length; j++) {
