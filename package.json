@@ -4,7 +4,7 @@
     "main": "index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "compile": "yarn solcjs --bin --abi --include-path node_modules/ --base-path . -o . contracts/main.sol"
+        "compile": "mkdir -p build && yarn solcjs --bin --abi --include-path node_modules/ --base-path . -o ./build contracts/main.sol"
     },
     "keywords": [],
     "author": "",
