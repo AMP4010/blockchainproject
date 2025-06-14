@@ -5,11 +5,13 @@ library utils {
 	struct persInfo {
 		string name;
 		uint8 age;
+		uint32 weight;
 		uint8 bloodtype;
-		string hospital;
+		uint16 patient_id;
+		string hosp_addr;
 	}
 
-    struct HLA {
+    	struct HLA {
 		string a1;
 		string a2;
 		string b1;
